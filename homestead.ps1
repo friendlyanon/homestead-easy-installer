@@ -210,7 +210,7 @@ if (Test-Path "$env:USERPROFILE\Homestead\" -PathType Container) {
         Write-Host "Homestead.yaml fájlt neked kell szerkeszteni, mivel van már VM telepítve"
     } elseif ($selectedVm -ne 0) {
         $yaml = [string](Get-Content "Homestead.yaml")
-        $providerRe = [regex]"/(provider:) \S+/"
+        $providerRe = [regex]"(provider:) \S+"
         $providerRe.Replace($yaml, "`$1 $($vms[$selectedVm][2])", 1) | Out-FileUtf8NoBom "Homestead.yaml"
     }
 
