@@ -124,11 +124,6 @@ $Vms = @(
         }
     ),
     @(
-        'VMWare',
-        { Install-RemoteFile 'https://www.vmware.com/go/getplayer-win' },
-        'vmware_workstation'
-    ),
-    @(
         'Hyper-V',
         { Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -ErrorAction Stop },
         'hyperv'
@@ -154,7 +149,7 @@ while ($true) {
                 break
             }
             Write-Host 'VM telepitese (ez sokaig eltarthat)'
-            $Vms[$SelectedVm][1].Invoke()
+            & $Vms[$SelectedVm][1]
             break
         }
     }
@@ -192,15 +187,27 @@ else {
 
     if ($SelectedVm -eq -1) {
         Write-Host 'Homestead.yaml fajlt neked kell szerkeszteni, mivel van mar VM telepitve'
+        Write-Host 'Szerkesztes utan futtasd a `homestead up --provision` parancsot'
     }
-    elseif ($SelectedVm -ne 0) {
-        $Yaml = [string](Get-Content 'Homestead.yaml')
-        $ProviderRe = [regex]'(provider:) \S+'
-        $ProviderRe.Replace($Yaml, "`$1 $($Vms[$SelectedVm][2])", 1) | Out-FileUtf8NoBom 'Homestead.yaml'
-    }
+    else {
+        if ($SelectedVm -ne 0) {
+            $Yaml = [string](Get-Content 'Homestead.yaml')
+            $ProviderRe = [regex]'(provider:) \S+'
+            $ProviderRe.Replace($Yaml, "`$1 $($Vms[$SelectedVm][2])", 1) | Out-FileUtf8NoBom 'Homestead.yaml'
+        }
 
-    Write-Host 'Vagrant Box elso futtatasa...'
-    & vagrant provision
+        Write-Host 'Vagrant Box elso futtatasa...'
+        & vagrant provision
+    }
+}
+
+if (Test-Path "$env:USERPROFILE\Code\" -PathType Container) {
+    Write-Host 'Code mappa mar letezik'
+}
+else {
+    Write-Host 'Code mappa letrehozasa'
+    Set-Location $env:USERPROFILE
+    Start-Process -Wait mkdir Code
 }
 
 Write-Host @'
