@@ -20,13 +20,13 @@ function Get-Document([string] $Uri) {
 }
 
 function Install-IfNecessary {
-    param ([string] $Command, [string] $Name, [scriptblock] $Installer, [switch] $Long)
+    param([string] $Command, [string] $Name, [scriptblock] $Installer, [switch] $Long)
 
     if (Get-Command $Command -ErrorAction Ignore) {
         Write-Output "$Name mar telepitve van"
     }
     else {
-        Write-Host "$Name telepitese" + (if ($Long) { ' (ez sokaig eltarthat)' } else { '' })
+        Write-Host "$Name telepitese" + (Iif $Long ' (ez sokaig eltarthat)' '')
         & $Installer
         Use-NewPath
     }
@@ -42,6 +42,25 @@ function Get-Downloader {
 
 function Get-RemoteFile([string] $Url, [string] $Filename) {
     (Get-Downloader).DownloadFile($Url, $Filename)
+}
+
+function Iif($Condition, $TrueCase, $FalseCase) {
+    if ($Condition) { $TrueCase } else { $FalseCase }
+}
+
+function Install-RemoteFile {
+    [CmdletBinding()]
+    param([Parameter(Mandatory, ValueFromPipeline)] [string] $Url, [switch] $Msi)
+
+    $File = 'installer.' + (Iif $Msi msi exe)
+    Get-RemoteFile $Url $File
+    if ($Msi) {
+        Start-Process -Wait msiexec '/I', (Resolve-Path $File)
+    }
+    else {
+        Start-Process -Wait $File
+    }
+    Remove-Item $File
 }
 
 function Out-FileUtf8NoBom {
@@ -85,37 +104,28 @@ Install-IfNecessary node Node { & choco install -y node }
 Install-IfNecessary cmder 'cmder es UNIX eszkozok' { & choco install -y cmder }
 
 Install-IfNecessary -Long vagrant Vagrant {
-    $Link = Find (Get-Document 'https://www.vagrantup.com/downloads.html').Links `
-    { $_.outerHTML.Contains('data-os="windows"') -and $_.outerHTML.Contains('data-arch="x86_64"') }
-    Get-RemoteFile $Link.href 'vagrant.msi'
-    Start-Process -Wait msiexec '/I', (Resolve-Path 'vagrant.msi')
-    Remove-Item 'vagrant.msi'
+    (Find (Get-Document 'https://www.vagrantup.com/downloads.html').Links `
+        { $_.outerHTML.Contains('data-os="windows"') -and $_.outerHTML.Contains('data-arch="x86_64"') }).href | `
+        Install-RemoteFile -Msi
 }
 
 Write-Host 'Hosts File Editor telepitese'
-Get-RemoteFile 'https://github.com/scottlerch/HostsFileEditor/releases/download/v1.2.0/HostsFileEditorSetup-1.2.0.msi' 'hfe.msi'
-Start-Process -Wait msiexec '/I', (Resolve-Path 'hfe.msi')
-Remove-Item 'hfe.msi'
+'https://github.com/scottlerch/HostsFileEditor/releases/download/v1.2.0/HostsFileEditorSetup-1.2.0.msi' | `
+    Install-RemoteFile -Msi
 
 $SelectedVm = 0
 $Vms = @(
     @(
         'VirtualBox',
         {
-            $Link = Find (Get-Document 'https://www.virtualbox.org/wiki/Downloads').Links `
-            { $_.class -eq 'ext-link' }
-            Get-RemoteFile $Link.href 'vbox.exe'
-            Start-Process -Wait 'vbox.exe'
-            Remove-Item 'vbox.exe'
+            (Find (Get-Document 'https://www.virtualbox.org/wiki/Downloads').Links `
+                { $_.class -eq 'ext-link' }).href | `
+                Install-RemoteFile
         }
     ),
     @(
         'VMWare',
-        {
-            Get-RemoteFile 'https://www.vmware.com/go/getplayer-win' 'vmware.exe'
-            Start-Process -Wait 'vmware.exe'
-            Remove-Item 'vmware.exe'
-        },
+        { Install-RemoteFile 'https://www.vmware.com/go/getplayer-win' },
         'vmware_workstation'
     ),
     @(
@@ -123,7 +133,7 @@ $Vms = @(
         { Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -ErrorAction Stop },
         'hyperv'
     ),
-    @(,'Mar van telepitve VM')
+    @(, 'Mar van telepitve VM')
 )
 
 Write-Host 'VM telepitese'
@@ -153,7 +163,8 @@ while ($true) {
     }
 }
 
-$Bat = @'
+Set-Location $env:windir
+@'
 @echo off
 
 set cwd=%cd%
@@ -165,9 +176,7 @@ cd /d %cwd%
 set cwd=
 set homesteadVagrant=
 
-'@
-Set-Location $env:windir
-Write-Output $Bat | Out-FileUtf8NoBom 'homestead.bat'
+'@ | Out-FileUtf8NoBom 'homestead.bat'
 
 if (Test-Path "$env:USERPROFILE\Homestead\" -PathType Container) {
     Write-Host 'Homestead mar telepitve van'
