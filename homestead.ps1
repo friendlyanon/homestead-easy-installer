@@ -23,7 +23,7 @@ function Install-IfNecessary {
     param([string] $Command, [string] $Name, [scriptblock] $Installer, [switch] $Long)
 
     if (Get-Command $Command -ErrorAction Ignore) {
-        Write-Output "$Name mar telepitve van"
+        Write-Host "$Name mar telepitve van"
     }
     else {
         Write-Host "$Name telepitese" + (Iif $Long ' (ez sokaig eltarthat)' '')
