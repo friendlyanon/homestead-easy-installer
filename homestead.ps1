@@ -1,6 +1,7 @@
 #requires -version 3 -RunAsAdministrator
 
 $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8
+
 function Use-NewPath {
     $Path = @(
         [System.Environment]::GetEnvironmentVariable('Path', 'Machine'),
@@ -122,7 +123,7 @@ $Vms = @(
         { Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -ErrorAction Stop },
         'hyperv'
     ),
-    @('Mar van telepitve VM')
+    @(,'Mar van telepitve VM')
 )
 
 Write-Host 'VM telepitese'
