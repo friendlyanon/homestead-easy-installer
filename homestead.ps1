@@ -95,11 +95,16 @@ function Out-FileUtf8NoBom {
     }
 }
 
+if ($false -eq (Test-Connection -ComputerName 'chocolatey.org' -Quiet)) {
+    Write-Host 'Internet eleres szukseges'
+    break
+}
+
 Install-IfNecessary choco Chocolatey {
     Invoke-Expression ((Get-Downloader).DownloadString('https://chocolatey.org/install.ps1'))
 }
 
-Install-IfNecessary node Node { & choco install -y node }
+Install-IfNecessary node Node { & choco install -y nodejs }
 
 Install-IfNecessary cmder 'cmder es UNIX eszkozok' { & choco install -y cmder }
 
