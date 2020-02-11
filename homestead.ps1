@@ -186,7 +186,7 @@ else {
     Write-Host 'Addj meg egy emailt az SSH kulcshoz: ' -NoNewline
     $Email = Read-Host
     if ([string]::IsNullOrEmpty($Email)) {
-        $Email = 'easy.installer@hometsead.com'
+        $Email = 'easy.installer@homestead.com'
     }
     Write-Host 'Addj meg egy jelszot az SSH kulcshoz: ' -NoNewline
     $Password = Read-Host -AsSecureString
