@@ -178,13 +178,46 @@ set homesteadVagrant=
 
 '@ | Out-FileUtf8NoBom 'homestead.bat'
 
+if (Test-Path "$env:USERPROFILE\.ssh\id_rsa" -PathType Leaf) {
+    Write-Host 'SSH kulcs telepitve van'
+}
+else {
+    Write-Host 'SSH kulcs telepitese'
+    Write-Host 'Addj meg egy emailt az SSH kulcshoz: ' -NoNewline
+    $Email = Read-Host
+    if ([string]::IsEmptyOrNull($Email)) {
+        $Email = 'easy.installer@hometsead.com'
+    }
+    Write-Host 'Addj meg egy jelszot az SSH kulcshoz: ' -NoNewline
+    $Password = Read-Host -AsSecureString
+    if ([string]::IsEmptyOrNull($Password)) {
+        $Password = ''
+    }
+
+    Start-Process -Wait ssh-keygen -ArgumentList @(
+        '-t',
+        'rsa',
+        '-b',
+        '4096',
+        '-C',
+        $Email,
+        '-f',
+        "$env:USERPROFILE\.ssh\id_rsa",
+        '-N',
+        $Password
+    )
+
+    Set-Service ssh-agent -StartupType Manual
+    Start-Process -Wait ssh-agent '-s'
+}
+
 if (Test-Path "$env:USERPROFILE\Homestead\" -PathType Container) {
     Write-Host 'Homestead mar telepitve van'
 }
 else {
     Write-Host 'Homestead telepitese'
     Set-Location $env:USERPROFILE
-    Start-Process -Wait mkdir Code
+    New-Item Code -ItemType Directory
     Start-Process -Wait git clone, 'https://github.com/laravel/homestead.git', Homestead
     Set-Location Homestead
     Start-Process -Wait git checkout, release
