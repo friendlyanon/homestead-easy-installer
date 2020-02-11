@@ -185,12 +185,12 @@ else {
     Write-Host 'SSH kulcs telepitese'
     Write-Host 'Addj meg egy emailt az SSH kulcshoz: ' -NoNewline
     $Email = Read-Host
-    if ([string]::IsEmptyOrNull($Email)) {
+    if ([string]::IsNullOrEmpty($Email)) {
         $Email = 'easy.installer@hometsead.com'
     }
     Write-Host 'Addj meg egy jelszot az SSH kulcshoz: ' -NoNewline
     $Password = Read-Host -AsSecureString
-    if ([string]::IsEmptyOrNull($Password)) {
+    if ([string]::IsNullOrEmpty($Password)) {
         $Password = ''
     }
 
