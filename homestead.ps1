@@ -233,9 +233,6 @@ else {
             $ProviderRe = [regex]'(provider:) \S+'
             $ProviderRe.Replace($Yaml, "`$1 $($Vms[$SelectedVm][2])", 1) | Out-FileUtf8NoBom 'Homestead.yaml'
         }
-
-        Write-Host 'Vagrant Box elso futtatasa...'
-        & vagrant provision
     }
 }
 
@@ -250,7 +247,12 @@ else {
 
 Write-Host @'
 
-Kesz! Par hasznos parancs vagranthoz:
+Kesz!
+
+Ha telepitesre kerult a Vagrant ezzel a telepitovel, akkor futtasd a
+vagrant-homestead.bat fajlt is a szamitogep ujrainditasa utan.
+
+Par hasznos parancs vagranthoz:
 
   homestead up
     Bootolja a homestead virtualis gepet
