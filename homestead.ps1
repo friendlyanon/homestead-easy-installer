@@ -108,11 +108,7 @@ Install-IfNecessary node Node { & choco install -y nodejs }
 
 Install-IfNecessary cmder 'cmder es UNIX eszkozok' { & choco install -y cmder }
 
-Install-IfNecessary -Long vagrant Vagrant {
-    (Find (Get-Document 'https://www.vagrantup.com/downloads.html').Links `
-        { $_.outerHTML.Contains('data-os="windows"') -and $_.outerHTML.Contains('data-arch="x86_64"') }).href | `
-        Install-RemoteFile -Msi
-}
+Install-IfNecessary vagrant Vagrant { & choco install -y vagrant }
 
 Write-Host 'Hosts File Editor telepitese'
 'https://github.com/scottlerch/HostsFileEditor/releases/download/v1.2.0/HostsFileEditorSetup-1.2.0.msi' | `
