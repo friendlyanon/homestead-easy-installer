@@ -1,4 +1,4 @@
-if (Get-Command $Command -ErrorAction Ignore) {
+if (Get-Command vagrant -ErrorAction Ignore) {
     Set-Location "$env:USERPROFILE\Homestead"
     & vagrant provision
 }
