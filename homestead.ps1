@@ -126,7 +126,7 @@ $Vms = @(
     ),
     @(
         'Hyper-V',
-        { Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -ErrorAction Stop },
+        { Enable-WindowsOptionalFeature -Online -FeatureName 'Microsoft-Hyper-V' -All -ErrorAction Stop },
         'hyperv'
     ),
     @(, 'Mar van telepitve VM')
@@ -183,24 +183,21 @@ else {
     $Email = Read-Host
     if ([string]::IsNullOrEmpty($Email)) {
         $Email = 'easy.installer@homestead.com'
+        Write-Host "Email: $Email"
     }
     Write-Host 'Addj meg egy jelszot az SSH kulcshoz: ' -NoNewline
-    $Password = Read-Host -AsSecureString
+    $Password = Read-Host
     if ([string]::IsNullOrEmpty($Password)) {
-        $Password = ''
+        $Password = 'secret'
+        Write-Host "Password: $Password"
     }
 
-    Start-Process -Wait ssh-keygen -ArgumentList @(
-        '-t',
-        'rsa',
-        '-b',
-        '4096',
-        '-C',
-        $Email,
-        '-f',
-        "$env:USERPROFILE\.ssh\id_rsa",
-        '-N',
-        $Password
+    Start-Process -Wait ssh-keygen @(
+        '-b', '4096',
+        '-t', 'rsa',
+        '-N', $Password,
+        '-C', $Email,
+        '-f', "$env:USERPROFILE\.ssh\id_rsa"
     )
 
     Set-Service ssh-agent -StartupType Manual
