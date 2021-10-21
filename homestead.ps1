@@ -110,19 +110,13 @@ Install-IfNecessary cmder 'cmder es UNIX eszkozok' { & choco install -y cmder }
 
 Install-IfNecessary vagrant Vagrant { & choco install -y vagrant }
 
-Write-Host 'Hosts File Editor telepitese'
-'https://github.com/scottlerch/HostsFileEditor/releases/download/v1.2.0/HostsFileEditorSetup-1.2.0.msi' | `
-    Install-RemoteFile -Msi
+choco install -y hosts.editor
 
 $SelectedVm = 0
 $Vms = @(
     @(
         'VirtualBox',
-        {
-            (Find (Get-Document 'https://www.virtualbox.org/wiki/Downloads').Links `
-                { $_.class -eq 'ext-link' }).href | `
-                Install-RemoteFile
-        }
+        { & choco install -y virtualbox }
     ),
     @(
         'Hyper-V',
@@ -179,24 +173,14 @@ if (Test-Path "$env:USERPROFILE\.ssh\id_rsa" -PathType Leaf) {
 }
 else {
     Write-Host 'SSH kulcs telepitese'
-    Write-Host 'Addj meg egy emailt az SSH kulcshoz: ' -NoNewline
-    $Email = Read-Host
-    if ([string]::IsNullOrEmpty($Email)) {
-        $Email = 'easy.installer@homestead.com'
-        Write-Host "Email: $Email"
-    }
-    Write-Host 'Addj meg egy jelszot az SSH kulcshoz: ' -NoNewline
-    $Password = Read-Host
-    if ([string]::IsNullOrEmpty($Password)) {
-        $Password = 'secret'
-        Write-Host "Password: $Password"
-    }
+
+    New-Item "$env:USERPROFILE\.ssh" -ItemType Directory
 
     Start-Process -Wait ssh-keygen @(
         '-b', '4096',
         '-t', 'rsa',
-        '-N', $Password,
-        '-C', $Email,
+        '-N', '',
+        '-C', 'Empty',
         '-f', "$env:USERPROFILE\.ssh\id_rsa"
     )
 
@@ -210,7 +194,6 @@ if (Test-Path "$env:USERPROFILE\Homestead\" -PathType Container) {
 else {
     Write-Host 'Homestead telepitese'
     Set-Location $env:USERPROFILE
-    New-Item Code -ItemType Directory
     Start-Process -Wait git clone, 'https://github.com/laravel/homestead.git', Homestead
     Set-Location Homestead
     Start-Process -Wait git checkout, release
@@ -234,8 +217,7 @@ if (Test-Path "$env:USERPROFILE\Code\" -PathType Container) {
 }
 else {
     Write-Host 'Code mappa letrehozasa'
-    Set-Location $env:USERPROFILE
-    Start-Process -Wait mkdir Code
+    New-Item "$env:USERPROFILE\Code" -ItemType Directory
 }
 
 Write-Host @'
